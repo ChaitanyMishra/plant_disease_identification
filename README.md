@@ -105,3 +105,4 @@ The model detects **38 classes** across plants including:
 
 **Guide:** Mr. Shiv Bahadur Singh
 # plant_disease_identification
+# plant_disease_identification
