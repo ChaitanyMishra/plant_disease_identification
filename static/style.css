@@ -1,0 +1,88 @@
+/* Extracted from index.html */
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #0b1a0c;
+  color: #e8f0e9;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(74,160,80,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74,160,80,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.bg-glow {
+  position: fixed; z-index: 0; pointer-events: none;
+  border-radius: 50%; filter: blur(120px); opacity: 0.12;
+}
+.bg-glow-1 { width: 600px; height: 600px; background: #2d7a34; top: -200px; left: -150px; }
+.bg-glow-2 { width: 400px; height: 400px; background: #d4a843; bottom: -100px; right: -100px; }
+
+.wrapper {
+  position: relative; z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 52px;
+  animation: fadeDown 0.7s ease both;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #2d7a34, #4aa050);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 20px rgba(74,160,80,0.4);
+}
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #e8f0e9;
+  letter-spacing: -0.5px;
+}
+
+.logo-text span { color: #7ed084; }
+
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+
+header h1 em {
+  font-style: italic;
+  color: #7ed084;
+}
+
+header p {
+  color: #7a9c7c;
+  font-size: 16px;
+  font-weight: 300;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ...rest of CSS omitted for brevity... */

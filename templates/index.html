@@ -382,6 +382,28 @@
       font-weight: 300;
     }
 
+    .gemini-highlight {
+      display: none;
+      margin-bottom: 22px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(126, 208, 132, 0.45);
+      background: linear-gradient(135deg, rgba(74,160,80,0.12), rgba(126,208,132,0.08));
+    }
+    .gemini-highlight h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: var(--green-light);
+      margin-bottom: 8px;
+    }
+    .gemini-highlight p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      white-space: pre-line;
+    }
+
     /* Top 3 */
     .top3-title {
       font-size: 12px;
@@ -485,6 +507,106 @@
       .upload-card, .result-card { padding: 24px 20px; }
       .result-header { flex-direction: column; }
     }
+
+    /* ── Chatbot ──────────────────────────────────────────── */
+    #chatbot-fab {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 2000;
+      background: var(--green-1);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      box-shadow: 0 4px 24px rgba(74,160,80,0.25);
+      font-size: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    #chatbot-fab:hover { background: var(--green-2); }
+    #chatbot-box {
+      position: fixed;
+      bottom: 110px;
+      right: 32px;
+      z-index: 2100;
+      width: 340px;
+      max-width: 95vw;
+      background: var(--bg-card);
+      border-radius: 18px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--border-glow);
+    }
+    #chatbot-header {
+      background: var(--green-2);
+      color: #fff;
+      padding: 16px 18px;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #chatbot-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #chatbot-messages {
+      padding: 16px 14px 12px 14px;
+      height: 260px;
+      overflow-y: auto;
+      background: var(--bg-card);
+      font-size: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chatbot-msg {
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 90%;
+      word-break: break-word;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+    .chatbot-user { align-self: flex-end; background: var(--green-1); color: #fff; }
+    .chatbot-bot { align-self: flex-start; background: #222e23; color: var(--green-light); }
+    #chatbot-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+    #chatbot-input {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 15px;
+      background: #181f1a;
+      color: #fff;
+    }
+    #chatbot-send {
+      background: var(--green-1);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    #chatbot-send:disabled { opacity: 0.6; cursor: not-allowed; }
   </style>
 </head>
 
@@ -497,9 +619,15 @@
 
     <!-- Header -->
     <header>
-      <div class="logo">
-        <div class="logo-icon">🌿</div>
-        <div class="logo-text">Leaf<span>AI</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="logo" style="margin-bottom:0;">
+          <div class="logo-icon">🌿</div>
+          <div class="logo-text">Leaf<span>AI</span></div>
+        </div>
+        <nav>
+          <a href="/" style="color:#7ed084;margin-right:18px;text-decoration:none;font-weight:500;">Home</a>
+          <a href="/about" style="color:#7ed084;text-decoration:none;font-weight:500;">About</a>
+        </nav>
       </div>
       <h1>Detect Plant Diseases<br>with <em>AI Precision</em></h1>
       <p>Upload a leaf image and our deep learning model will identify diseases instantly with high accuracy.</p>
@@ -554,9 +682,24 @@
           </div>
         </div>
 
+
         <div class="treatment-box">
           <h4>💊 Recommended Action</h4>
           <p id="treatment-text">—</p>
+          <button id="routine-btn" style="margin-top:12px;padding:8px 18px;border-radius:8px;background:var(--green-1);color:#fff;border:none;cursor:pointer;font-size:14px;">Show 7-Day Recovery Routine</button>
+        </div>
+
+        <div class="gemini-highlight" id="gemini-highlight">
+          <h4>✨ Gemini Fallback Analysis</h4>
+          <p id="gemini-highlight-text"></p>
+        </div>
+
+        <div id="routine-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;">
+          <div style="background:#181f1a;padding:32px 24px 24px 24px;border-radius:18px;max-width:400px;width:90vw;box-shadow:0 8px 40px rgba(0,0,0,0.5);position:relative;">
+            <button id="close-routine" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;color:#fff;cursor:pointer;">&times;</button>
+            <h3 style="margin-bottom:16px;font-size:20px;color:var(--green-light);">7-Day Recovery Routine</h3>
+            <ol id="routine-list" style="color:#e8f0e9;font-size:15px;line-height:1.7;padding-left:20px;"></ol>
+          </div>
         </div>
 
         <p class="top3-title">Top 3 Predictions</p>
@@ -568,10 +711,24 @@
 
     <!-- Footer -->
     <footer>
-      <p>Built for BCA Major Project · Maharana Pratap College · Session 2025–26</p>
-      <p style="margin-top:6px">Powered by MobileNetV2 + TensorFlow · PlantVillage Dataset</p>
+      <p>Built by <strong>Chaitany Mishra</strong> for BCA Major Project · Maharana Pratap College · Session 2025–26</p>
+      <p style="margin-top:6px">Powered by MobileNetV2, TensorFlow, PlantVillage Dataset, and Gemini AI API. <a href="/about" style="color:#7ed084;">About this project</a></p>
     </footer>
 
+  </div>
+
+  <!-- Chatbot Floating Button -->
+  <button id="chatbot-fab" title="Chat with LeafAI">💬</button>
+  <div id="chatbot-box">
+    <div id="chatbot-header">
+      LeafAI Chatbot
+      <button id="chatbot-close">&times;</button>
+    </div>
+    <div id="chatbot-messages"></div>
+    <form id="chatbot-input-row" autocomplete="off">
+      <input id="chatbot-input" type="text" placeholder="Ask about plant diseases..." required />
+      <button id="chatbot-send" type="submit">Send</button>
+    </form>
   </div>
 
   <script>
@@ -596,8 +753,18 @@
     const treatmentTxt = document.getElementById('treatment-text');
     const top3List     = document.getElementById('top3-list');
     const tryAgainBtn  = document.getElementById('try-again-btn');
+    const geminiHighlight = document.getElementById('gemini-highlight');
+    const geminiHighlightText = document.getElementById('gemini-highlight-text');
+    const chatbotFab   = document.getElementById('chatbot-fab');
+    const chatbotBox   = document.getElementById('chatbot-box');
+    const chatbotClose = document.getElementById('chatbot-close');
+    const chatbotMsgs  = document.getElementById('chatbot-messages');
+    const chatbotForm  = document.getElementById('chatbot-input-row');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotSend  = document.getElementById('chatbot-send');
 
     let selectedFile = null;
+    let latestPrediction = null;
 
     // ── Drag & Drop ────────────────────────────────────────
     dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragging'); });
@@ -659,6 +826,7 @@
 
     // ── Show Result ────────────────────────────────────────
     function showResult(data) {
+      latestPrediction = data;
       const isHealthy = data.is_healthy;
 
       // Card theme
@@ -671,8 +839,27 @@
       confText.textContent = data.confidence + '%';
       setTimeout(() => { confBar.style.width = data.confidence + '%'; }, 50);
 
-      // Treatment
+      // Treatment and low-confidence Gemini note
       treatmentTxt.textContent = data.treatment;
+      geminiHighlight.style.display = 'none';
+      geminiHighlightText.textContent = '';
+      if (data.gemini_used && data.gemini_result) {
+        geminiHighlight.style.display = 'block';
+        if (typeof data.gemini_result === 'object') {
+          const confidenceNote = data.gemini_result.confidence_note || 'Low confidence model output, switched to Gemini analysis.';
+          const details = data.gemini_result.detailed_advice || '';
+          const status = data.is_healthy ? 'Healthy' : 'Not Healthy';
+          geminiHighlightText.textContent =
+            `Model confidence was below 70%, so this result uses Gemini.\n` +
+            `Plant: ${data.plant}\n` +
+            `Diagnosis: ${data.disease}\n` +
+            `Health Status: ${status}\n` +
+            `Note: ${confidenceNote}\n\n` +
+            `${details}`;
+        } else {
+          geminiHighlightText.textContent = String(data.gemini_result);
+        }
+      }
 
       // Top 3
       top3List.innerHTML = '';
@@ -685,6 +872,44 @@
         `;
         top3List.appendChild(div);
       });
+
+      // Routine button logic
+      const routineBtn = document.getElementById('routine-btn');
+      const routineModal = document.getElementById('routine-modal');
+      const routineList = document.getElementById('routine-list');
+      const closeRoutine = document.getElementById('close-routine');
+
+      routineBtn.onclick = async function() {
+        routineList.innerHTML = '<li>Loading...</li>';
+        routineModal.style.display = 'flex';
+        // Use routine from prediction if present, else fetch
+        let routine = data.routine;
+        if (!routine) {
+          try {
+            const res = await fetch('/routine', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ disease: data.disease })
+            });
+            const rdata = await res.json();
+            routine = rdata.routine;
+          } catch {
+            routine = null;
+          }
+        }
+        if (routine && Array.isArray(routine)) {
+          routineList.innerHTML = '';
+          routine.forEach(day => {
+            const li = document.createElement('li');
+            li.textContent = day;
+            routineList.appendChild(li);
+          });
+        } else {
+          routineList.innerHTML = '<li>Routine not available.</li>';
+        }
+      };
+      closeRoutine.onclick = function() { routineModal.style.display = 'none'; };
+      routineModal.onclick = function(e) { if (e.target === routineModal) routineModal.style.display = 'none'; };
 
       resultSec.style.display = 'block';
       resultSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -716,6 +941,66 @@
     function hideError() {
       errorMsg.style.display = 'none';
     }
+
+    // ── Chatbot ────────────────────────────────────────────
+    function addChatMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = 'chatbot-msg ' + (role === 'user' ? 'chatbot-user' : 'chatbot-bot');
+      div.textContent = formatChatText(text);
+      chatbotMsgs.appendChild(div);
+      chatbotMsgs.scrollTop = chatbotMsgs.scrollHeight;
+    }
+
+    function formatChatText(text) {
+      return String(text || '')
+        .replace(/\r/g, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+
+    chatbotFab.addEventListener('click', () => {
+      chatbotBox.style.display = 'flex';
+      if (!chatbotMsgs.dataset.welcomed) {
+        addChatMessage('Hi! I can help with plant diagnosis, treatment plans, and also explain this website (who built it, tech stack, and how it works).', 'bot');
+        chatbotMsgs.dataset.welcomed = '1';
+      }
+    });
+
+    chatbotClose.addEventListener('click', () => {
+      chatbotBox.style.display = 'none';
+    });
+
+    chatbotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = chatbotInput.value.trim();
+      if (!message) return;
+
+      addChatMessage(message, 'user');
+      chatbotInput.value = '';
+      chatbotSend.disabled = true;
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            prediction: latestPrediction
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          addChatMessage(data.error || 'Chat service unavailable right now.', 'bot');
+        } else {
+          addChatMessage(data.reply, 'bot');
+        }
+      } catch {
+        addChatMessage('Unable to connect to chatbot service.', 'bot');
+      } finally {
+        chatbotSend.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
