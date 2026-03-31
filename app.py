@@ -5,7 +5,6 @@ from PIL import Image
 import io
 import json
 import os
-
 import requests
 
 load_dotenv()
@@ -314,6 +313,7 @@ def health():
     return jsonify({'status': 'ok', 'model_loaded': model is not None, 'num_classes': len(class_names)})
 
 if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
     load_model()
     print("\n🌿 Server running! Open http://localhost:5000\n")
-    app.run(debug=False, port=5000, host='0.0.0.0', use_reloader=False)
+    app.run(debug=False, port=port, host='0.0.0.0', use_reloader=False)
