@@ -42,18 +42,28 @@ CLASS_NAMES_PATH = os.path.join('model', 'class_names.json')
 
 def load_model():
     global model, class_names
+    abs_model_path = os.path.abspath(MODEL_PATH)
+    abs_model_dir = os.path.dirname(abs_model_path)
     if not os.path.exists(MODEL_PATH):
-        print("⚠️  Model file not found at:", MODEL_PATH)
+        print(f"⚠️  Model file not found at: {MODEL_PATH} (absolute: {abs_model_path})")
+        if os.path.exists(abs_model_dir):
+            print(f"Contents of model directory ({abs_model_dir}): {os.listdir(abs_model_dir)}")
+        else:
+            print(f"Model directory does not exist: {abs_model_dir}")
         return
     try:
         import tensorflow as tf
-        print("Loading model...")
+        print(f"Loading model from {MODEL_PATH} (absolute: {abs_model_path}) ...")
         model = tf.keras.models.load_model(MODEL_PATH)
         with open(CLASS_NAMES_PATH, 'r') as f:
             class_names = json.load(f)
         print(f"✅ Model loaded! Supports {len(class_names)} disease classes.")
     except Exception as e:
         print(f"❌ Error loading model: {e}")
+        if os.path.exists(abs_model_dir):
+            print(f"Contents of model directory ({abs_model_dir}): {os.listdir(abs_model_dir)}")
+        else:
+            print(f"Model directory does not exist: {abs_model_dir}")
 
 def preprocess_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
