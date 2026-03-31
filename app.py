@@ -311,9 +311,9 @@ def routine():
 @app.route('/health')
 def health():
     return jsonify({'status': 'ok', 'model_loaded': model is not None, 'num_classes': len(class_names)})
-
+load_model()
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    load_model()
+    
     print("\n🌿 Server running! Open http://localhost:5000\n")
     app.run(debug=False, port=port, host='0.0.0.0', use_reloader=False)
