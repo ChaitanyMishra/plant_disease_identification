@@ -218,7 +218,25 @@ def predict():
             from gemini_api import gemini_analyze_leaf_health
             gemini_result = gemini_analyze_leaf_health(img_bytes, GEMINI_API_KEY)
             gemini_used = True
-            # Low-confidence fallback: switch output to Gemini result when available.
+            # If Gemini returns a markdown code block with JSON, parse it and extract only 'detailed_advice'
+            if isinstance(gemini_result, str):
+                import re
+                # Remove markdown code block markers
+                cleaned = re.sub(r'^```json|^```|```$', '', gemini_result.strip(), flags=re.MULTILINE).strip()
+                try:
+                    gemini_json = json.loads(cleaned)
+                    # Only extract 'detailed_advice' for frontend
+                    gemini_result = {
+                        'detailed_advice': gemini_json.get('detailed_advice', ''),
+                        'plant_name': gemini_json.get('plant_name', ''),
+                        'disease_name': gemini_json.get('disease_name', ''),
+                        'is_healthy': gemini_json.get('is_healthy', None),
+                        'confidence_note': gemini_json.get('confidence_note', '')
+                    }
+                    if gemini_result['detailed_advice']:
+                        treatment = gemini_result['detailed_advice']
+                except Exception:
+                    pass
             if isinstance(gemini_result, dict):
                 gemini_plant = (gemini_result.get('plant_name') or '').strip()
                 gemini_disease = (gemini_result.get('disease_name') or '').strip()
@@ -247,6 +265,10 @@ def predict():
         'gemini_used': gemini_used,
         'gemini_result': gemini_result
     }
+    # If Gemini result is a dict and has 'detailed_advice', only send that as gemini_result
+    gemini_result_to_send = gemini_result
+    if isinstance(gemini_result, dict) and 'detailed_advice' in gemini_result:
+        gemini_result_to_send = gemini_result['detailed_advice']
     return jsonify({
         'success':    True,
         'plant':      plant_name,
@@ -255,7 +277,7 @@ def predict():
         'is_healthy': is_healthy,
         'treatment':  treatment,
         'top3':       top3,
-        'gemini_result': gemini_result,
+        'gemini_result': gemini_result_to_send,
         'gemini_used': gemini_used,
         'routine':    routine
     })

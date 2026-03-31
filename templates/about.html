@@ -3,40 +3,734 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About | LeafAI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <title>About | LeafAI — Plant Disease Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+
   <style>
-    body { background: #0b1a0c; color: #e8f0e9; font-family: 'DM Sans', sans-serif; margin: 0; }
-    .container { max-width: 700px; margin: 48px auto; background: #111f12; border-radius: 18px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); padding: 40px 28px; }
-    h1 { font-family: 'Playfair Display', serif; color: #7ed084; font-size: 2.5em; margin-bottom: 12px; }
-    h2 { color: #4aa050; margin-top: 32px; }
-    p, li { font-size: 1.1em; line-height: 1.7; }
-    ul { margin: 0 0 0 20px; }
-    .credit { margin-top: 40px; color: #7a9c7c; font-size: 1em; }
-    a { color: #7ed084; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .back-link { display: inline-block; margin-bottom: 24px; color: #7ed084; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:           #06110a;
+      --ink-2:         #0c1e10;
+      --surface:       #0f1e12;
+      --surface-2:     #152119;
+      --surface-3:     #1a2a1e;
+      --moss:          #3d7a45;
+      --fern:          #5aab64;
+      --leaf:          #7fd186;
+      --sage:          #a8c9aa;
+      --mist:          rgba(127,209,134,0.08);
+      --mist-2:        rgba(127,209,134,0.14);
+      --gold:          #c9a84c;
+      --gold-light:    #e2c97e;
+      --crimson:       #c0444a;
+      --crimson-soft:  #e07070;
+      --text-1:        #ddeedd;
+      --text-2:        #8aab8c;
+      --text-3:        #4a6b4c;
+      --border:        rgba(90,171,100,0.15);
+      --border-bright: rgba(90,171,100,0.40);
+      --glow:          0 0 40px rgba(90,171,100,0.12);
+      --glow-strong:   0 0 60px rgba(90,171,100,0.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--ink);
+      color: var(--text-1);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Organic background ── */
+    .canvas-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(100px); opacity: 0.07;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #3d7a45, transparent); top: -200px; left: -200px; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #c9a84c, transparent); bottom: -150px; right: -100px; animation-delay: -7s; }
+    .orb-3 { width: 350px; height: 350px; background: radial-gradient(circle, #5aab64, transparent); top: 40%; left: 60%; animation-delay: -14s; }
+
+    .noise {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .botanical-left {
+      position: fixed; left: -60px; top: 50%; transform: translateY(-50%);
+      width: 180px; opacity: 0.04; z-index: 0; pointer-events: none;
+    }
+    .botanical-right {
+      position: fixed; right: -60px; top: 30%; transform: translateY(-50%) scaleX(-1);
+      width: 180px; opacity: 0.04; z-index: 0; pointer-events: none;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 40px) scale(1.08); }
+    }
+
+    /* ── Layout ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 28px 100px;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 72px;
+      animation: slideDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 38px; height: 38px;
+      border: 1.5px solid var(--border-bright);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      background: var(--mist);
+      box-shadow: var(--glow);
+      position: relative;
+      text-decoration: none;
+    }
+    .brand-mark::after {
+      content: '';
+      position: absolute; inset: -4px;
+      border-radius: 14px;
+      border: 1px solid rgba(90,171,100,0.1);
+    }
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 600;
+      letter-spacing: 0.5px; color: var(--text-1);
+      text-decoration: none;
+    }
+    .brand-name em { font-style: italic; color: var(--leaf); }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--text-3);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--leaf); }
+
+    /* ── Page Hero ── */
+    .page-hero {
+      text-align: center; margin-bottom: 56px;
+      animation: slideDown 0.7s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--fern); margin-bottom: 24px;
+      padding: 6px 14px; border: 1px solid var(--border);
+      border-radius: 99px; background: var(--mist);
+    }
+    .hero-eyebrow::before { content: '●'; font-size: 7px; animation: blink 2s ease infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(40px, 6vw, 68px);
+      font-weight: 300; line-height: 1.05;
+      letter-spacing: -1px; margin-bottom: 20px;
+    }
+    .page-hero h1 strong {
+      font-weight: 600; font-style: italic;
+      background: linear-gradient(135deg, var(--leaf) 0%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-hero p {
+      font-size: 15px; font-weight: 400;
+      color: var(--text-2); max-width: 500px;
+      margin: 0 auto; line-height: 1.7;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 20px;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--fern), transparent);
+      opacity: 0.4;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--text-3); margin-bottom: 20px;
+    }
+
+    /* ── What is LeafAI ── */
+    .about-intro { animation: slideUp 0.7s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .about-intro p {
+      font-size: 15px; line-height: 1.85; color: var(--text-2);
+      font-weight: 400;
+    }
+    .about-intro p + p { margin-top: 16px; }
+    .about-intro strong { color: var(--text-1); font-weight: 600; }
+
+    /* ── Features Grid ── */
+    .features-card { animation: slideUp 0.7s 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px; margin-top: 4px;
+    }
+    .feature-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 22px 20px;
+      transition: border-color 0.25s, transform 0.25s;
+      cursor: default;
+    }
+    .feature-item:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-3px);
+      box-shadow: var(--glow);
+    }
+    .feature-icon {
+      font-size: 28px; margin-bottom: 12px; display: block;
+      filter: drop-shadow(0 0 10px rgba(90,171,100,0.25));
+    }
+    .feature-title {
+      font-size: 14px; font-weight: 600; color: var(--text-1);
+      margin-bottom: 6px; letter-spacing: 0.2px;
+    }
+    .feature-desc {
+      font-size: 12px; color: var(--text-3); line-height: 1.6;
+    }
+
+    /* ── Tech Stack ── */
+    .stack-card { animation: slideUp 0.7s 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .stack-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px; margin-top: 4px;
+    }
+    .stack-item {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 16px;
+      display: flex; align-items: center; gap: 12px;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .stack-item:hover { border-color: var(--border-bright); background: var(--mist-2); }
+
+    .stack-icon { font-size: 22px; flex-shrink: 0; }
+    .stack-info {}
+    .stack-name {
+      font-size: 13px; font-weight: 600; color: var(--text-1);
+    }
+    .stack-role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text-3); letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ── Architecture ── */
+    .arch-card { animation: slideUp 0.7s 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .arch-flow {
+      display: flex; align-items: center; gap: 0;
+      margin-top: 8px; overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .arch-step {
+      flex-shrink: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+      text-align: center; min-width: 110px;
+      transition: border-color 0.25s;
+    }
+    .arch-step:hover { border-color: var(--border-bright); }
+    .arch-step-icon { font-size: 22px; margin-bottom: 6px; }
+    .arch-step-name {
+      font-size: 12px; font-weight: 600; color: var(--text-1);
+    }
+    .arch-step-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text-3); letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+    .arch-arrow {
+      color: var(--text-3); font-size: 16px;
+      padding: 0 8px; flex-shrink: 0;
+    }
+
+    /* ── Team ── */
+    .team-card { animation: slideUp 0.7s 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .team-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px; margin-top: 4px;
+    }
+    .member-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 24px 20px;
+      text-align: center;
+      transition: border-color 0.25s, transform 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .member-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--fern), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .member-card:hover { border-color: var(--border-bright); transform: translateY(-4px); }
+    .member-card:hover::before { opacity: 0.5; }
+    .member-card.lead { border-color: rgba(201,168,76,0.25); }
+    .member-card.lead::before { opacity: 0.3; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+    .member-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--mist); border: 1.5px solid var(--border-bright);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin: 0 auto 14px;
+      box-shadow: var(--glow);
+    }
+    .member-card.lead .member-avatar {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(201,168,76,0.06);
+    }
+    .member-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; font-weight: 600; color: var(--text-1);
+      margin-bottom: 4px;
+    }
+    .member-role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-3);
+    }
+    .member-card.lead .member-role { color: var(--gold); }
+    .member-badge {
+      display: inline-block; margin-top: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: 1px;
+      padding: 3px 8px; border-radius: 4px;
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold-light); background: rgba(201,168,76,0.06);
+    }
+
+    /* ── Guide ── */
+    .guide-card { animation: slideUp 0.7s 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .guide-inner {
+      display: flex; align-items: center; gap: 20px;
+      padding: 20px 22px;
+      background: var(--surface-2);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 16px;
+    }
+    .guide-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(201,168,76,0.06);
+      border: 1.5px solid rgba(201,168,76,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; flex-shrink: 0;
+    }
+    .guide-details {}
+    .guide-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 5px;
+    }
+    .guide-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 600; color: var(--text-1);
+      margin-bottom: 2px;
+    }
+    .guide-dept {
+      font-size: 13px; color: var(--text-2);
+    }
+
+    /* ── College ── */
+    .college-card { animation: slideUp 0.7s 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .college-inner {
+      display: flex; align-items: flex-start; gap: 20px;
+    }
+    .college-icon {
+      font-size: 40px; flex-shrink: 0;
+      filter: drop-shadow(0 0 12px rgba(90,171,100,0.2));
+    }
+    .college-info {}
+    .college-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 600; color: var(--text-1);
+      margin-bottom: 6px;
+    }
+    .college-details {
+      font-size: 13px; color: var(--text-2); line-height: 1.7;
+    }
+    .college-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .college-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; padding: 3px 10px; border-radius: 4px;
+      border: 1px solid var(--border); color: var(--text-3); letter-spacing: 0.5px;
+    }
+
+    /* ── GitHub CTA ── */
+    .cta-card {
+      animation: slideUp 0.7s 0.6s cubic-bezier(0.16,1,0.3,1) both;
+      text-align: center;
+      background: linear-gradient(160deg, #0b1f0e 0%, #0f2314 50%, #0b1a0d 100%);
+    }
+    .cta-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 600;
+      color: var(--text-1); margin-bottom: 10px;
+    }
+    .cta-card p { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 24px; }
+    .cta-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--moss), var(--fern));
+      color: var(--ink); font-size: 14px; font-weight: 700;
+      font-family: 'Syne', sans-serif; letter-spacing: 0.3px;
+      border-radius: 12px; text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 4px 30px rgba(90,171,100,0.25);
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(90,171,100,0.4);
+    }
+    .cta-btn svg { width: 18px; height: 18px; fill: var(--ink); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; margin-top: 60px;
+      animation: slideUp 0.7s 0.65s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .footer-divider {
+      width: 80px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+      margin: 0 auto 20px;
+    }
+    footer p { font-size: 12px; color: var(--text-3); line-height: 1.8; }
+    footer a { color: var(--text-2); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: var(--leaf); }
+    .footer-stack {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px;
+    }
+    .stack-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; padding: 3px 8px; border-radius: 4px;
+      border: 1px solid var(--border); color: var(--text-3); letter-spacing: 0.5px;
+    }
+
+    /* ── Animations ── */
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 620px) {
+      .wrapper { padding: 28px 16px 80px; }
+      .card { padding: 28px 20px; }
+      .arch-flow { gap: 0; }
+      .college-inner { flex-direction: column; gap: 12px; }
+      .guide-inner { flex-direction: column; text-align: center; }
+      .page-hero h1 { font-size: 36px; }
+    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <a href="/" class="back-link">← Back to Home</a>
-    <h1>About LeafAI</h1>
-    <p><strong>LeafAI</strong> is a modern web application designed to help farmers, students, and plant enthusiasts quickly identify plant diseases from leaf images using deep learning and the Gemini AI API. The project provides actionable advice and routines for plant recovery, and features an AI-powered chatbot for all your plant health questions.</p>
-    <h2>Features</h2>
-    <ul>
-      <li>Instant plant disease detection from leaf images</li>
-      <li>7-day recovery routines tailored to each disease</li>
-      <li>Gemini AI-powered chatbot for Q&A</li>
-      <li>Beautiful, responsive, and user-friendly interface</li>
-      <li>Project details and credits</li>
-    </ul>
-    <h2>Who Built This?</h2>
-    <p>This project was built by <strong>Chaitany Mishra</strong>,<strong>Aryan Gupta</strong> ,<strong>Bhuyash Pathak</strong> ,<strong>Asmit Singh</strong>  as a BCA Major Project at Maharana Pratap College, Session 2025–26.</p>
-    <div class="credit">
-      <p>Powered by MobileNetV2, TensorFlow, PlantVillage Dataset, and Gemini AI API.<br>
-      <a href="https://github.com/ChaitanyMishra/plant_disease_identification" target="_blank">View on GitHub</a></p>
+  <div class="canvas-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="noise"></div>
+
+  <!-- Botanical SVG decor -->
+  <svg class="botanical-left" viewBox="0 0 120 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 400 Q60 300 30 250 Q0 200 40 150 Q70 100 50 50" stroke="#5aab64" stroke-width="1.5" fill="none"/>
+    <path d="M50 200 Q20 170 10 140" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <path d="M45 280 Q15 260 5 230" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <ellipse cx="15" cy="130" rx="18" ry="12" transform="rotate(-30 15 130)" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <ellipse cx="8" cy="220" rx="20" ry="13" transform="rotate(-20 8 220)" stroke="#5aab64" stroke-width="1" fill="none"/>
+  </svg>
+  <svg class="botanical-right" viewBox="0 0 120 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 400 Q60 300 30 250 Q0 200 40 150 Q70 100 50 50" stroke="#5aab64" stroke-width="1.5" fill="none"/>
+    <path d="M50 200 Q20 170 10 140" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <path d="M45 280 Q15 260 5 230" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <ellipse cx="15" cy="130" rx="18" ry="12" transform="rotate(-30 15 130)" stroke="#5aab64" stroke-width="1" fill="none"/>
+    <ellipse cx="8" cy="220" rx="20" ry="13" transform="rotate(-20 8 220)" stroke="#5aab64" stroke-width="1" fill="none"/>
+  </svg>
+
+  <div class="wrapper">
+
+    <!-- Nav -->
+    <nav>
+      <div class="nav-brand">
+        <a href="/" class="brand-mark">🌿</a>
+        <a href="/" class="brand-name">Leaf<em>AI</em></a>
+      </div>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about" class="active">About</a>
+      </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <div class="page-hero">
+      <div class="hero-eyebrow">BCA Major Project · 2025–26</div>
+      <h1>Behind<br><strong>Leaf AI</strong></h1>
+      <p>A deep-learning plant disease intelligence system built with MobileNetV2, Flask, and Gemini AI — designed to assist farmers, researchers, and plant enthusiasts.</p>
     </div>
+
+    <!-- About Intro -->
+    <div class="card about-intro">
+      <div class="section-label">// What is LeafAI</div>
+      <p><strong>LeafAI</strong> is a modern web application that identifies plant diseases from leaf images using a convolutional neural network trained on the PlantVillage dataset. Upload any leaf photo and receive an instant diagnosis — along with actionable treatment advice and a 7-day recovery routine.</p>
+      <p>When model confidence drops below the threshold, <strong>Gemini AI</strong> seamlessly steps in as a fallback, ensuring reliable results even on ambiguous or unusual inputs. An integrated chatbot lets you ask follow-up questions about the diagnosis in plain language.</p>
+    </div>
+
+    <!-- Features -->
+    <div class="card features-card">
+      <div class="section-label">// Features</div>
+      <div class="features-grid">
+        <div class="feature-item">
+          <span class="feature-icon">🔬</span>
+          <div class="feature-title">CNN Disease Detection</div>
+          <div class="feature-desc">MobileNetV2 trained on 38+ disease classes from PlantVillage dataset.</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🤖</span>
+          <div class="feature-title">Gemini AI Fallback</div>
+          <div class="feature-desc">Low-confidence predictions escalate automatically to Gemini for better accuracy.</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📅</span>
+          <div class="feature-title">7-Day Routines</div>
+          <div class="feature-desc">Personalised recovery plans tailored to each detected disease.</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💬</span>
+          <div class="feature-title">AI Chatbot</div>
+          <div class="feature-desc">Ask follow-up questions about any diagnosis in plain conversational language.</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📱</span>
+          <div class="feature-title">Fully Responsive</div>
+          <div class="feature-desc">Works seamlessly on desktop, tablet, and mobile devices.</div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">⚡</span>
+          <div class="feature-title">Drag & Drop Upload</div>
+          <div class="feature-desc">Instant image preview with drag-and-drop or file picker support.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="card stack-card">
+      <div class="section-label">// Technology Stack</div>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <span class="stack-icon">🧠</span>
+          <div class="stack-info">
+            <div class="stack-name">MobileNetV2</div>
+            <div class="stack-role">CNN Model</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-icon">🔷</span>
+          <div class="stack-info">
+            <div class="stack-name">TensorFlow</div>
+            <div class="stack-role">ML Framework</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-icon">🌱</span>
+          <div class="stack-info">
+            <div class="stack-name">PlantVillage</div>
+            <div class="stack-role">Dataset</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-icon">✨</span>
+          <div class="stack-info">
+            <div class="stack-name">Gemini API</div>
+            <div class="stack-role">AI Fallback</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-icon">🐍</span>
+          <div class="stack-info">
+            <div class="stack-name">Flask</div>
+            <div class="stack-role">Backend</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-icon">🎨</span>
+          <div class="stack-info">
+            <div class="stack-name">HTML / CSS / JS</div>
+            <div class="stack-role">Frontend</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture Flow -->
+    <div class="card arch-card">
+      <div class="section-label">// How It Works</div>
+      <div class="arch-flow">
+        <div class="arch-step">
+          <div class="arch-step-icon">🍃</div>
+          <div class="arch-step-name">Upload Image</div>
+          <div class="arch-step-sub">PNG / JPG / WEBP</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step">
+          <div class="arch-step-icon">⚙️</div>
+          <div class="arch-step-name">Preprocessing</div>
+          <div class="arch-step-sub">224×224 · MobileNet</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step">
+          <div class="arch-step-icon">🧠</div>
+          <div class="arch-step-name">CNN Inference</div>
+          <div class="arch-step-sub">38+ Classes</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step">
+          <div class="arch-step-icon">✨</div>
+          <div class="arch-step-name">Gemini Fallback</div>
+          <div class="arch-step-sub">if conf &lt; 70%</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step">
+          <div class="arch-step-icon">📋</div>
+          <div class="arch-step-name">Result + Advice</div>
+          <div class="arch-step-sub">Treatment · Routine</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team -->
+    <div class="card team-card">
+      <div class="section-label">// Team</div>
+      <div class="team-grid">
+        <div class="member-card lead">
+          <div class="member-avatar">👨‍💻</div>
+          <div class="member-name">Chaitany Mishra</div>
+          <div class="member-role">Developer</div>
+          <div class="member-badge">Project Lead</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">🧑‍🎓</div>
+          <div class="member-name">Aryan Gupta</div>
+          <div class="member-role">Team Member</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">🧑‍🎓</div>
+          <div class="member-name">Bhuyash Pathak</div>
+          <div class="member-role">Team Member</div>
+        </div>
+        <div class="member-card">
+          <div class="member-avatar">🧑‍🎓</div>
+          <div class="member-name">Asmit Singh</div>
+          <div class="member-role">Team Member</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guide -->
+    <div class="card guide-card">
+      <div class="section-label">// Project Guide</div>
+      <div class="guide-inner">
+        <div class="guide-avatar">🎓</div>
+        <div class="guide-details">
+          <div class="guide-label">Faculty Guide</div>
+          <div class="guide-name">Mr. Shiv Bahadur Singh</div>
+          <div class="guide-dept">Department of Computer Science · Maharana Pratap College</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- College -->
+    <div class="card college-card">
+      <div class="section-label">// Institution</div>
+      <div class="college-inner">
+        <div class="college-icon">🏛️</div>
+        <div class="college-info">
+          <div class="college-name">Maharana Pratap College of Professional Studies</div>
+          <div class="college-details">
+            Kanpur, Uttar Pradesh, India<br>
+            Bachelor of Computer Applications (BCA) · Session 2025–26<br>
+            Major Project Submission · 6th Semester
+          </div>
+          <div class="college-tags">
+            <span class="college-tag">BCA Major Project</span>
+            <span class="college-tag">6th Semester</span>
+            <span class="college-tag">2025–26</span>
+            <span class="college-tag">Kanpur</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub CTA -->
+    <div class="card cta-card">
+      <h3>View the Source Code</h3>
+      <p>The full project — training scripts, Flask backend, and frontend — is open source on GitHub.</p>
+      <a href="https://github.com/ChaitanyMishra/plant_disease_identification" target="_blank" rel="noopener" class="cta-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        View on GitHub →
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-divider"></div>
+      <p>Built by <strong style="color:var(--text-2)">Chaitany Mishra</strong> · BCA Major Project · Maharana Pratap College · 2025–26</p>
+      <div class="footer-stack">
+        <span class="stack-tag">MobileNetV2</span>
+        <span class="stack-tag">TensorFlow</span>
+        <span class="stack-tag">PlantVillage</span>
+        <span class="stack-tag">Gemini API</span>
+        <span class="stack-tag">Flask</span>
+      </div>
+      <p style="margin-top:12px"><a href="/">← Back to Home</a></p>
+    </footer>
+
   </div>
 </body>
 </html>

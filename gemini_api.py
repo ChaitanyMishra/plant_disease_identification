@@ -71,8 +71,8 @@ def _gemini_generate(api_key, parts):
 def gemini_analyze_leaf_health(image_bytes, api_key):
     img_b64 = base64.b64encode(image_bytes).decode("utf-8")
     prompt = (
-        "You are a plant pathology assistant. Analyze the given plant leaf image and return ONLY valid JSON.\n"
-        "Output schema:\n"
+        "You are a plant pathology assistant. Analyze the given plant leaf image and respond with ONLY valid JSON, no explanations, no markdown, no code blocks, no extra text.\n"
+        "Output schema (respond with only this object, no prose):\n"
         "{\n"
         '  "plant_name": "string",\n'
         '  "disease_name": "string",\n'
@@ -83,7 +83,8 @@ def gemini_analyze_leaf_health(image_bytes, api_key):
         "Rules:\n"
         "- is_healthy must be true or false.\n"
         "- If unclear, still provide your best estimate and mention uncertainty in confidence_note.\n"
-        "- Do not include markdown or code fences."
+        "- Do not include markdown, code fences, or any text outside the JSON object.\n"
+        "- If you cannot identify the plant or disease, fill the fields with your best guess, not 'Unknown'."
     )
     text = _gemini_generate(
         api_key,
@@ -93,8 +94,23 @@ def gemini_analyze_leaf_health(image_bytes, api_key):
         ],
     )
 
+    # Log raw Gemini output for debugging
+    print("[Gemini raw output]:", repr(text))
+
+    # Try to extract JSON if wrapped in markdown or extra text
+    import re
+    cleaned = text.strip()
+    # Remove markdown code block if present
+    if cleaned.startswith('```'):
+        cleaned = re.sub(r'^```[a-zA-Z]*', '', cleaned)
+        cleaned = re.sub(r'```$', '', cleaned).strip()
+    # Try to extract JSON object from text
+    json_match = re.search(r'\{[\s\S]*\}', cleaned)
+    if json_match:
+        cleaned = json_match.group(0)
+
     try:
-        parsed = json.loads(text)
+        parsed = json.loads(cleaned)
         return {
             "plant_name": parsed.get("plant_name", "Unknown"),
             "disease_name": parsed.get("disease_name", "Unknown"),
@@ -115,19 +131,41 @@ def gemini_analyze_leaf_health(image_bytes, api_key):
 def gemini_chat_response(user_message, prediction_context, project_context, api_key):
     context = prediction_context or {}
     site_context = project_context or {}
+
+    # ✅ FIX: Check if a real prediction exists (plant + disease must be present)
+    has_prediction = bool(context.get("plant") and context.get("disease"))
+
+    if has_prediction:
+        # Tell Gemini exactly what was diagnosed — never ask for image again
+        diagnosis_summary = (
+            f"The user has ALREADY uploaded a leaf image and the diagnosis is complete. "
+            f"Plant: {context.get('plant')}, "
+            f"Disease: {context.get('disease')}, "
+            f"Confidence: {context.get('confidence')}%, "
+            f"Healthy: {context.get('is_healthy')}. "
+            f"Treatment advice: {context.get('treatment', 'N/A')}. "
+            f"Do NOT ask the user to upload an image — it is already done."
+        )
+    else:
+        diagnosis_summary = (
+            "No leaf image has been uploaded yet. "
+            "If the user asks about plant disease, politely ask them to upload a leaf image first."
+        )
+
     prompt = (
         "You are LeafAI assistant. Be friendly, natural, and conversational.\n"
         "You can answer both plant-health questions and website/project questions.\n"
         "If user asks about who made this, how it works, technologies, or purpose, use the provided website context.\n"
         "If user asks non-plant casual questions, answer briefly and then offer help with the app.\n"
-        "Avoid robotic numbered templates unless user asks for step-by-step format.\n"
-        f"Prediction context (JSON): {json.dumps(context)}\n"
-        f"Website context (JSON): {json.dumps(site_context)}\n"
+        "Avoid robotic numbered templates unless user asks for step-by-step format.\n\n"
+        f"CURRENT DIAGNOSIS STATUS: {diagnosis_summary}\n\n"
+        f"Full prediction context (JSON): {json.dumps(context)}\n"
+        f"Website context (JSON): {json.dumps(site_context)}\n\n"
         f"User question: {user_message}\n\n"
         "Response style:\n"
         "- Keep response concise, human, and useful.\n"
         "- Use short paragraphs or bullets only when helpful.\n"
-        "- If a prediction context exists, connect answer with it.\n"
-        "- If no prediction is available, ask user to upload an image for diagnosis."
+        "- If a prediction context exists, connect your answer with it.\n"
+        "- NEVER ask the user to upload an image if diagnosis is already done.\n"
     )
     return _gemini_generate(api_key, [{"text": prompt}])
